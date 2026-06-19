@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ourdigest"
+version = "0.1.0"
+description = "Self-hosted topic digest aggregator. Pulls Reddit, HN, Lemmy, arXiv, filters by keyword, summarizes via OpenAI-compatible LLM, serves RSS."
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pyyaml>=6.0",
+    "feedgen>=1.0",
+    "tenacity>=9.0",
+    "pydantic>=2.8",
+    "click>=8.1",
+    "feedparser>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "respx>=0.21",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+ourdigest = "ourdigest.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["ourdigest"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

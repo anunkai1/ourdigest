@@ -1,0 +1,17 @@
+[Unit]
+Description=ourdigest HTTP server (FastAPI + uvicorn)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=architect
+WorkingDirectory=/home/architect/ourdigest
+EnvironmentFile=/home/architect/ourdigest/.env
+ExecStart=/home/architect/ourdigest/.venv/bin/ourdigest serve --host 127.0.0.1 --port 8088
+Restart=on-failure
+RestartSec=5s
+Nice=5
+
+[Install]
+WantedBy=multi-user.target
