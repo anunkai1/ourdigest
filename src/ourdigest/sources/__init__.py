@@ -8,13 +8,14 @@ from .reddit import RedditSource
 from .hackernews import HackerNewsSource
 from .lemmy import LemmySource
 from .arxiv import ArxivSource
-
+from .googlenews import GoogleNewsSource
 
 _REGISTRY: dict[str, type[Source]] = {
     "reddit": RedditSource,
     "hackernews": HackerNewsSource,
     "lemmy": LemmySource,
     "arxiv": ArxivSource,
+    "googlenews": GoogleNewsSource,
 }
 
 
