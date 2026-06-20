@@ -1,9 +1,14 @@
-"""Reddit source: pulls /r/<subreddit> JSON, no auth required."""
+"""Reddit source: pulls /r/<subreddit> RSS feed (no auth required).
+
+Reddit's anonymous JSON API now returns 403 for most clients.
+RSS feeds are still open and provide title/link/author/date.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timezone, timedelta
-from typing import Any
+from io import BytesIO
 
+import feedparser
 import httpx
 
 from .base import Source
@@ -36,35 +41,45 @@ class RedditSource(Source):
         lookback_hours: int,
         limit: int,
     ) -> list[Story]:
-        url = f"https://www.reddit.com/r/{self.subreddit}/{self.sort}.json"
-        params = {"t": self.time, "limit": str(min(limit, 100))}
+        # Reddit RSS: https://www.reddit.com/r/<sub>/.rss?sort=top&t=day
+        url = f"https://www.reddit.com/r/{self.subreddit}/.rss"
+        params = {"sort": self.sort, "t": self.time}
         headers = {"User-Agent": "ourdigest/0.1 (by /u/ourdigest)"}
-        resp = await client.get(url, params=params, headers=headers, timeout=15.0, follow_redirects=True)
+        resp = await client.get(
+            url, params=params, headers=headers, timeout=15.0, follow_redirects=True
+        )
         resp.raise_for_status()
-        data = resp.json()
-        children = data.get("data", {}).get("children", []) or []
+        feed = feedparser.parse(BytesIO(resp.content))
         cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
         out: list[Story] = []
-        for child in children:
-            d: dict[str, Any] = child.get("data") or {}
-            permalink = d.get("permalink") or ""
-            full_url = f"https://www.reddit.com{permalink}" if permalink else d.get("url", "")
-            if not full_url:
+        for entry in feed.entries:
+            title = (entry.get("title") or "").strip()
+            link = (entry.get("link") or "").strip()
+            if not title or not link:
                 continue
-            created = datetime.fromtimestamp(d.get("created_utc", 0), tz=timezone.utc)
-            if created < cutoff:
+            published = cutoff + timedelta(seconds=1)  # default: keep
+            if hasattr(entry, "published_parsed") and entry.published_parsed:
+                try:
+                    published = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
+                except (TypeError, ValueError):
+                    pass
+            if published < cutoff:
                 continue
+            author = (entry.get("author") or "").strip()
+            snippet = ""
+            if hasattr(entry, "summary"):
+                snippet = (entry.summary or "")[:500]
             out.append(
                 Story(
                     source=f"r/{self.subreddit}",
                     source_type=self.source_type,
-                    url=full_url,
-                    title=d.get("title", "").strip(),
-                    snippet=(d.get("selftext") or "")[:500],
-                    author=d.get("author", ""),
-                    published=created,
-                    score=int(d.get("score", 0) or 0),
-                    comments_url=full_url,
+                    url=link,
+                    title=title,
+                    snippet=snippet,
+                    author=author,
+                    published=published,
+                    score=0,
+                    comments_url=link,
                 )
             )
             if len(out) >= limit:
