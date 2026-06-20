@@ -1,4 +1,10 @@
-"""Reddit source: scrapes old.reddit.com HTML (no API needed, includes scores)."""
+"""Reddit source: scrapes old.reddit.com HTML (no API needed, includes scores).
+
+Key: use full browser headers (Accept-Language, Accept-Encoding, Sec-Fetch-*).
+Minimal headers (just User-Agent + Accept) get 403 within a few requests.
+Full headers return 200 reliably for tens of fetches.
+httpx auto-decompresses gzip/br/deflate when advertised in Accept-Encoding.
+"""
 from __future__ import annotations
 
 import re
