@@ -43,11 +43,16 @@ async def _do_refresh(cfg: Config) -> dict[str, int]:
         base = _base_url()
         fdir = _feeds_dir(cfg)
         for topic in cfg.topics:
-            stories = topic_stories.get(topic.key, [])
-            write_feed(fdir / f"{topic.key}.xml", topic, stories, base_url=base)
-            counts[topic.key] = len(stories)
-        write_all_feed(fdir / "all.xml", cfg, topic_stories, base_url=base)
-        counts["all"] = sum(len(v) for v in topic_stories.values())
+            new_stories = topic_stories.get(topic.key, [])
+            feed_path = fdir / f"{topic.key}.xml"
+            if new_stories:
+                write_feed(feed_path, topic, new_stories, base_url=base)
+            counts[topic.key] = len(new_stories)
+        # all feed only updated when there are new items
+        total_new = sum(len(v) for v in topic_stories.values())
+        if total_new > 0:
+            write_all_feed(fdir / "all.xml", cfg, topic_stories, base_url=base)
+        counts["all"] = total_new
     return counts
 
 
