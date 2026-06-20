@@ -7,7 +7,8 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, PlainTextResponse
 
-from .config import Config
+from copy import deepcopy
+from .config import Config, SourceConfig
 from .feed import write_all_feed, write_feed
 from .fetcher import fetch_all
 from .storage import DedupStore
@@ -36,13 +37,13 @@ def _base_url() -> str:
     return os.environ.get("OURDIGEST_BASE_URL", "http://localhost:8088").rstrip("/")
 
 
-async def _do_refresh(cfg: Config) -> dict[str, int]:
+async def _do_refresh(run_cfg: Config) -> dict[str, int]:
     counts: dict[str, int] = {}
-    with DedupStore(_store_path(cfg)) as store:
-        topic_stories = await fetch_all(cfg, store=store, summarize=cfg.global_.summarize)
+    with DedupStore(_store_path(run_cfg)) as store:
+        topic_stories = await fetch_all(run_cfg, store=store, summarize=run_cfg.global_.summarize)
         base = _base_url()
-        fdir = _feeds_dir(cfg)
-        for topic in cfg.topics:
+        fdir = _feeds_dir(run_cfg)
+        for topic in run_cfg.topics:
             new_stories = topic_stories.get(topic.key, [])
             feed_path = fdir / f"{topic.key}.xml"
             if new_stories:
@@ -51,7 +52,7 @@ async def _do_refresh(cfg: Config) -> dict[str, int]:
         # all feed only updated when there are new items
         total_new = sum(len(v) for v in topic_stories.values())
         if total_new > 0:
-            write_all_feed(fdir / "all.xml", cfg, topic_stories, base_url=base)
+            write_all_feed(fdir / "all.xml", run_cfg, topic_stories, base_url=base)
         counts["all"] = total_new
     return counts
 
