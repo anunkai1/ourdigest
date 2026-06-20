@@ -5,6 +5,7 @@ from typing import Any
 
 from .base import Source
 from .reddit import RedditSource
+from .reddit_oauth import RedditOAuthSource
 from .hackernews import HackerNewsSource
 from .lemmy import LemmySource
 from .arxiv import ArxivSource
@@ -12,6 +13,7 @@ from .googlenews import GoogleNewsSource
 
 _REGISTRY: dict[str, type[Source]] = {
     "reddit": RedditSource,
+    "reddit_oauth": RedditOAuthSource,
     "hackernews": HackerNewsSource,
     "lemmy": LemmySource,
     "arxiv": ArxivSource,

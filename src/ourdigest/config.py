@@ -39,7 +39,7 @@ class SourceConfig(BaseModel):
     @field_validator("type")
     @classmethod
     def _known_type(cls, v: str) -> str:
-        allowed = {"reddit", "hackernews", "lemmy", "arxiv", "googlenews"}
+        allowed = {"reddit", "reddit_oauth", "hackernews", "lemmy", "arxiv", "googlenews"}
         if v not in allowed:
             raise ValueError(f"unknown source type {v!r}; allowed: {sorted(allowed)}")
         return v

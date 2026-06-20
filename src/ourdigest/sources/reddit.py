@@ -44,9 +44,19 @@ class RedditSource(Source):
         params = {"sort": self.sort, "t": self.time}
         headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0",
-            "Accept": "text/html,application/xhtml+xml",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "TE": "trailers",
         }
         resp = await client.get(url, params=params, headers=headers, timeout=15.0, follow_redirects=True)
+        # httpx auto-decompresses gzip/br/deflate when advertised; nothing extra needed
         resp.raise_for_status()
         html = resp.text
 
