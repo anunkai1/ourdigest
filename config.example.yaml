@@ -1,24 +1,15 @@
-# ourdigest config — AI/LLM topic set
-# Copy to config.yaml and customize.
-
 global:
   user_agent: "ourdigest/0.1 (https://github.com/anunkai1/ourdigest)"
   http_timeout_seconds: 15
   max_items_per_source: 25
-  lookback_hours: 36
+  lookback_hours: 48
   data_dir: "./data"
+  summarize: false
 
-  # LLM summarization — uses OpenAI-compatible /chat/completions
-  summarize: true
-  summarize_model: "qwen2.5-7b-instruct"
-  summarize_max_input_chars: 1500
-  # OPENAI_BASE_URL and OPENAI_API_KEY come from env (do not put secrets here)
-
-# Topics — each becomes its own RSS feed at /feed/<key>.xml
 topics:
   - key: ai
     title: "AI Digest"
-    description: "Broad AI news from HN, Reddit, Lemmy."
+    description: "Broad AI news from Reddit (singularity, OpenAI, artificial, MachineLearning)."
     keywords_any:
       - llm
       - ai
@@ -26,6 +17,7 @@ topics:
       - agent
       - gpt
       - claude
+      - gemini
       - "machine learning"
       - neural
       - transformer
@@ -33,26 +25,33 @@ topics:
       - openai
       - anthropic
       - deepmind
-    keywords_all: []
-    keywords_none: []
+      - agi
+      - singularity
     sources:
-      - type: hackernews
-        name: "HN front"
-        query_tags: ["front_page"]
-        limit: 30
+      - type: reddit
+        name: "r/singularity"
+        subreddit: "singularity"
+        sort: "top"
+        time: "day"
+      - type: reddit
+        name: "r/OpenAI"
+        subreddit: "OpenAI"
+        sort: "top"
+        time: "day"
+      - type: reddit
+        name: "r/artificial"
+        subreddit: "artificial"
+        sort: "top"
+        time: "day"
       - type: reddit
         name: "r/MachineLearning"
         subreddit: "MachineLearning"
         sort: "top"
         time: "day"
-      - type: lemmy
-        name: "!ai@lemmy.world"
-        community: "ai@lemmy.world"
-        sort: "Hot"
 
   - key: llm
     title: "LLM Digest"
-    description: "LLM-specific: LocalLLaMA, cs.CL arXiv, HN llm tag."
+    description: "LLM-specific: LocalLLaMA."
     keywords_any:
       - llm
       - llama
@@ -76,17 +75,3 @@ topics:
         subreddit: "LocalLLaMA"
         sort: "top"
         time: "day"
-      - type: hackernews
-        name: "HN stories tagged llm"
-        query_tags: ["story"]
-        query: "llm OR llama OR qwen OR rag"
-        limit: 30
-      - type: arxiv
-        name: "arXiv cs.CL"
-        category: "cs.CL"
-      - type: arxiv
-        name: "arXiv cs.AI"
-        category: "cs.AI"
-      - type: arxiv
-        name: "arXiv cs.LG"
-        category: "cs.LG"
