@@ -115,7 +115,7 @@ class RedditSource(Source):
             domain = attrs.get("data-domain", "")
 
             if permalink:
-                full_url = f"https://old.reddit.com{permalink}"
+                full_url = f"https://reddit.com{permalink}"
             elif link_url and link_url.startswith("http"):
                 full_url = link_url
             else:
@@ -133,7 +133,7 @@ class RedditSource(Source):
                 author=author,
                 published=published,
                 score=score,
-                comments_url=f"https://old.reddit.com{permalink}" if permalink else full_url,
+                comments_url=f"https://reddit.com{permalink}" if permalink else full_url,
             ))
             if len(out) >= limit:
                 break
