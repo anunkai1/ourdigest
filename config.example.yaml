@@ -1,7 +1,7 @@
 global:
   user_agent: "ourdigest/0.1 (https://github.com/anunkai1/ourdigest)"
   http_timeout_seconds: 15
-  max_items_per_source: 25
+  max_items_per_source: 50
   lookback_hours: 48
   data_dir: "./data"
   summarize: false
@@ -10,23 +10,7 @@ topics:
   - key: ai
     title: "AI Digest"
     description: "Broad AI news from Reddit (singularity, OpenAI, artificial, MachineLearning)."
-    keywords_any:
-      - llm
-      - ai
-      - "artificial intelligence"
-      - agent
-      - gpt
-      - claude
-      - gemini
-      - "machine learning"
-      - neural
-      - transformer
-      - diffusion
-      - openai
-      - anthropic
-      - deepmind
-      - agi
-      - singularity
+    min_score: 100
     sources:
       - type: reddit
         name: "r/singularity"
@@ -52,23 +36,7 @@ topics:
   - key: llm
     title: "LLM Digest"
     description: "LLM-specific: LocalLLaMA."
-    keywords_any:
-      - llm
-      - llama
-      - qwen
-      - mistral
-      - mixtral
-      - gpt
-      - claude
-      - gemini
-      - "language model"
-      - "context window"
-      - rag
-      - "fine-tuning"
-      - inference
-      - vllm
-      - ollama
-      - gguf
+    min_score: 100
     sources:
       - type: reddit
         name: "r/LocalLLaMA"
