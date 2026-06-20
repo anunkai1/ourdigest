@@ -20,14 +20,19 @@ log = logging.getLogger(__name__)
 
 
 def _matches(story: Story, topic: TopicConfig) -> bool:
-    haystack = f"{story.title}\n{story.url}\n{story.snippet}".lower()
-    if topic.keywords_none and any(k in haystack for k in topic.keywords_none):
+    # Score threshold: drop anything below topic.min_score.
+    if topic.min_score and story.score < topic.min_score:
         return False
-    if topic.keywords_all and not all(k in haystack for k in topic.keywords_all):
-        return False
-    if topic.keywords_any:
-        return any(k in haystack for k in topic.keywords_any)
-    # No keywords configured: keep everything from this topic's sources.
+    # If keywords are configured, apply them as a secondary filter.
+    if topic.keywords_any or topic.keywords_all or topic.keywords_none:
+        haystack = f"{story.title}\n{story.url}\n{story.snippet}".lower()
+        if topic.keywords_none and any(k in haystack for k in topic.keywords_none):
+            return False
+        if topic.keywords_all and not all(k in haystack for k in topic.keywords_all):
+            return False
+        if topic.keywords_any:
+            return any(k in haystack for k in topic.keywords_any)
+    # No keywords and no min_score: keep everything.
     return True
 
 
@@ -70,7 +75,7 @@ async def fetch_topic(
 
     # 2. filter by keywords
     kept = [s for s in fetched if _matches(s, topic)]
-    log.info("topic %s: %d fetched, %d after keyword filter", topic.key, len(fetched), len(kept))
+    log.info("topic %s: %d fetched, %d after filter (min_score=%d)", topic.key, len(fetched), len(kept), topic.min_score)
 
     # 3. dedup against the store
     now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)

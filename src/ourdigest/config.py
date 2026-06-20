@@ -74,6 +74,7 @@ class TopicConfig(BaseModel):
     keywords_any: list[str] = Field(default_factory=list)
     keywords_all: list[str] = Field(default_factory=list)
     keywords_none: list[str] = Field(default_factory=list)
+    min_score: int = 0
     sources: list[SourceConfig] = Field(default_factory=list)
 
     @classmethod
@@ -86,6 +87,7 @@ class TopicConfig(BaseModel):
             keywords_any=[k.lower() for k in data.get("keywords_any", [])],
             keywords_all=[k.lower() for k in data.get("keywords_all", [])],
             keywords_none=[k.lower() for k in data.get("keywords_none", [])],
+            min_score=int(data.get("min_score", 0)),
             sources=sources,
         )
 
